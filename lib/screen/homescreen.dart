@@ -31,7 +31,7 @@ class HomeScreen extends StatelessWidget {
                 context.go("/game/$username"); // Adjusted route path
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Please enter your username')),
+                  const SnackBar(content: Text('Please enter your username')),
                 );
               }
             },

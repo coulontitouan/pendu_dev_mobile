@@ -2,25 +2,33 @@ import 'dart:core';
 import 'package:flutter/material.dart';
 import 'dart:math';
 
+import 'package:go_router/go_router.dart';
+
 class Partie {
-  late final String? username;
-  final List<Niveau> _ln = List.generate(10, (index) => Niveau(index + 1));
+  final String? username;
+  late final Map<int, bool> niveau;
 
-  static final Partie _instance = Partie._internal();
+  Partie({required this.username}) : niveau = _createNiveau();
 
-  factory Partie({required String? username}) {
-    _instance.username = username; // Initialisation de la variable username de l'instance
-    return _instance;
+  static Map<int, bool> _createNiveau() {
+    Map<int, bool> niveau = {};
+    for (int i = 1; i <= 10; i++) {
+      niveau[i] = i == 1;
+    }
+    return niveau;
   }
-
-  Partie._internal();
-
-  List<Niveau> get niveaux => _ln;
 
   getNiveau(int niveauActuel) {
-    return _ln[niveauActuel];
+    return niveauActuel+1;
+  }
+
+  void changerNiveau(int niveauF, bool value) {
+    if (niveau.containsKey(niveauF)) {
+      niveau[niveauF] = value;
+    }
   }
 }
+
 
 class Niveau {
   static final Map<int, List<String>> banqueDeMots = {
@@ -36,17 +44,21 @@ class Niveau {
     10: ['démocratique', 'électrocution', 'astronomique', 'détermination', 'émerveillement', 'microscopique', 'calamiteusement', 'congratulations', 'mélancoliquement', 'inévitablement', 'anticonstitutionnel', 'compréhensibilité'],
   };
 
-  final int difficulte;
-  Niveau(this.difficulte);
+  final String? difficulte;
+  Niveau({required this.difficulte});
   late final String mot = createMot(difficulte);
   late final String guess = createGuess(mot);
 
-  static createGuess(String mot){
-    String res = '_';
-    res *= mot.length;
+  createGuess(String mot){
+    String res = '';
+    for(int i=0; i<mot.length; i++) {
+      res += '_ ';
+    }
+    return res;
   }
-  static createMot(int difficulte) {
-    List<String> mots = banqueDeMots[difficulte] ?? [];
+  createMot(String? difficulte) {
+    int d = int.parse(difficulte!);
+    List<String> mots = banqueDeMots[d] ?? [];
     int indexAleatoire = Random().nextInt(mots.length);
     return mots[indexAleatoire];
   }
@@ -58,10 +70,10 @@ class Niveau {
     return guess;
   }
 }
-
 class Gamescreen extends StatelessWidget {
   final String? username;
   final Partie partie;
+
   Gamescreen({Key? key, required this.username})
       : partie = Partie(username: username),
         super(key: key); // Initialisation de partie
@@ -71,8 +83,41 @@ class Gamescreen extends StatelessWidget {
     return Column(
       children: [
         Text('Salut $username'),
-        Text('Niveau 1 : ${partie.getNiveau(1)}'),
+        ListView.builder(
+          shrinkWrap: true,
+          itemCount: partie.niveau.length,
+          itemBuilder: (context, index) {
+            bool niveauEstActif = partie.niveau[index + 1] ?? false;
+            return ElevatedButton(
+              onPressed: niveauEstActif
+                  ? () {
+                context.go("/game/$username/${partie.getNiveau(index)}");
+              }
+                  : null,
+              child: Text('Niveau ${partie.getNiveau(index)}'),
+            );
+          },
+        ),
       ],
     );
   }
 }
+
+
+class Niveauscreen extends StatelessWidget {
+  final String? difficulte;
+  Niveauscreen({super.key, required this.difficulte});
+  late final Niveau niveau = Niveau(difficulte: difficulte);
+
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Column(
+      children: [
+    Text('$difficulte , ${niveau.getMot()} :    ${niveau.getGuess()}'),
+
+      ],
+    );
+  }}
+
