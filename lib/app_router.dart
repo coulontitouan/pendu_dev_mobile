@@ -1,9 +1,8 @@
-import 'dart:js';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:penduflutter/screen/gamescreen.dart';
 import 'package:penduflutter/screen/homescreen.dart';
+import 'package:penduflutter/screen/niveauscreen.dart';
 import 'package:penduflutter/screen/rulescreen.dart';
 import 'package:penduflutter/screen/scorescreen.dart';
 
@@ -41,13 +40,15 @@ final router = GoRouter(
         return Gamescreen(username: username);
       },
       routes: [
-        GoRoute(path: ":Niveau",
-        name: 'Niveau',
-            parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state){
-          final niveauActuel = state.pathParameters['Niveau'];
-          return Niveauscreen(difficulte : niveauActuel);
-        }),
+        GoRoute(
+          path: ":Niveau",
+          name: 'Niveau',
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final niveauActuel = state.pathParameters['Niveau'];
+            return Niveauscreen(difficulte: niveauActuel);
+          },
+        ),
       ],
     ),
     GoRoute(
@@ -57,4 +58,3 @@ final router = GoRouter(
     ),
   ],
 );
-
