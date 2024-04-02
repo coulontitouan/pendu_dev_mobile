@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class Niveau {
   static final Map<int, List<String>> banqueDeMots = {
@@ -73,8 +74,8 @@ class Niveau {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  Navigator.pop(context, true); // Retourne true pour indiquer que le niveau a été réussi
-                },
+                  Navigator.pop(context, difficulte);
+                  },
                 child: Text('OK'),
               ),
             ],
@@ -87,7 +88,8 @@ class Niveau {
 
 class Niveauscreen extends StatefulWidget {
   final String? difficulte;
-  Niveauscreen({Key? key, required this.difficulte, required this.niveauReussi}) : super(key: key);
+  final String? username;
+  Niveauscreen({Key? key, required this.difficulte, required this.username}) : super(key: key);
 
   @override
   _NiveauscreenState createState() => _NiveauscreenState();
@@ -95,7 +97,6 @@ class Niveauscreen extends StatefulWidget {
 
 class _NiveauscreenState extends State<Niveauscreen> {
   late final Niveau niveau;
-
   @override
   void initState() {
     super.initState();
@@ -131,7 +132,7 @@ class _NiveauscreenState extends State<Niveauscreen> {
                   return Padding(
                     padding: EdgeInsets.all(5),
                     child: ElevatedButton(
-                      onPressed: widget.niveauReussi == true ? null : () {
+                      onPressed: niveau.mot == niveau.guess ? null : () {
                         setState(() {
                           niveau.updateGuess(letter);
                         });
@@ -152,13 +153,12 @@ class _NiveauscreenState extends State<Niveauscreen> {
 class Partie {
   final String? username;
   int niveauActuel = 1; // Niveau actuel
-  List<Niveau> niveauxReussis = [];
+
   Partie({required this.username});
 
   void niveauSuivant() {
     if (niveauActuel < 10) {
       niveauActuel++;
-      Niveau n= niveauxReussis[niveauActuel]
     }
   }
 }
@@ -227,9 +227,7 @@ class Niveaux extends StatefulWidget {
 
   @override
   _NiveauxState createState() => _NiveauxState();
-}
-
-class _NiveauxState extends State<Niveaux> {
+}class _NiveauxState extends State<Niveaux> {
   late final Partie partie;
 
   @override
@@ -247,32 +245,31 @@ class _NiveauxState extends State<Niveaux> {
       body: Padding(
         padding: EdgeInsets.all(20),
         child: ListView.builder(
-          itemCount: 10,
+          itemCount: partie.niveauActuel, // Utilise le niveau actuel comme nombre d'éléments
           itemBuilder: (context, index) {
-            int niveauActuel = index + 1;
+            int niveau = index + 1;
             return ListTile(
-              title: Text('Niveau $niveauActuel'),
-              trailing: partie.niveauxReussis[niveauActuel] == true
+              title: Text('Niveau $niveau'),
+              trailing: niveau <= partie.niveauActuel // Vérifie si le niveau est inférieur ou égal au niveau actuel
                   ? Icon(Icons.check_circle, color: Colors.green)
                   : null,
               onTap: () {
-                if (partie.niveauxReussis[niveauActuel - 1] == true) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Niveauscreen(
-                        difficulte: niveauActuel.toString(),
-                        niveauReussi: partie.niveauxReussis[niveauActuel],
-                      ),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Niveauscreen(
+                      difficulte: niveau.toString(),
+                      username: widget.username,
                     ),
-                  ).then((niveauReussi) {
-                    if (niveauReussi == true) {
-                      setState(() {
-                        partie.niveauSuivant();
-                      });
-                    }
-                  });
-                }
+                  ),
+                ).then((niveauReussi) {
+                  // Logique pour mettre à jour le niveau actuel si nécessaire après avoir terminé un niveau
+                  if (niveauReussi == true) {
+                    setState(() {
+                      partie.niveauSuivant();
+                    });
+                  }
+                });
               },
             );
           },
@@ -281,6 +278,7 @@ class _NiveauxState extends State<Niveaux> {
     );
   }
 }
+
 
 void main() {
   runApp(MaterialApp(

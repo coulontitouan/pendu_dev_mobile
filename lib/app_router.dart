@@ -1,59 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:penduflutter/screen/niveauscreen.dart';
 import 'package:penduflutter/screen/gamescreen.dart';
 import 'package:penduflutter/screen/homescreen.dart';
-import 'package:penduflutter/screen/niveauscreen.dart';
 import 'package:penduflutter/screen/rulescreen.dart';
 import 'package:penduflutter/screen/scorescreen.dart';
 
-final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
+void main() {
+  runApp(MyApp());
+}
 
-// Définir le routeur global
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      routerDelegate: router.routerDelegate,
+      routeInformationParser: router.routeInformationParser,
+    );
+  }
+}
+
 final router = GoRouter(
-  navigatorKey: _rootNavigatorKey,
   initialLocation: "/home",
-  routes: <RouteBase>[
+  routes: [
     GoRoute(
       path: '/',
-      redirect: (BuildContext context, GoRouterState state){
-        return '/home';
-      },
+      redirect: (BuildContext context, GoRouterState state) => '/home',
     ),
     GoRoute(
       path: "/home",
-      name: "home",
       builder: (context, state) => const HomeScreen(),
     ),
     GoRoute(
       path: "/rule",
-      name: "rule",
       builder: (context, state) => const RuleScreen(),
     ),
     GoRoute(
-      path: "/game/:username", // Chemin mis à jour pour inclure le paramètre dynamique username
-      name: "game",
+      path: "/game/:username",
       builder: (context, state) {
-        // Récupérer le paramètre username de l'URL
         final username = state.pathParameters['username'];
-
-        // Passer le username à la construction de Gamescreen
         return Gamescreen(username: username);
       },
       routes: [
         GoRoute(
-          path: ":Niveau",
-          name: 'Niveau',
-          parentNavigatorKey: _rootNavigatorKey,
+          path: ":niveau",
           builder: (context, state) {
-            final niveauActuel = state.pathParameters['Niveau'];
-            return Niveauscreen(difficulte: niveauActuel);
+            final niveau = state.pathParameters['niveau'];
+            final username = state.pathParameters['username'];
+            return Niveauscreen(difficulte: niveau,username: username);
           },
         ),
       ],
     ),
     GoRoute(
       path: "/score",
-      name: "score",
       builder: (context, state) => const Scorescreen(),
     ),
   ],

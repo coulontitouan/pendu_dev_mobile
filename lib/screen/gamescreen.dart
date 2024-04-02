@@ -31,7 +31,6 @@ class Partie {
     }
   }
 }
-
 class Gamescreen extends StatefulWidget {
   final String? username;
   final Partie partie;
@@ -45,6 +44,14 @@ class Gamescreen extends StatefulWidget {
 }
 
 class _GamescreenState extends State<Gamescreen> {
+  late String? username; // Initialisez la variable username
+
+  @override
+  void initState() {
+    super.initState();
+    username = widget.username; // Initialisez username dans la méthode initState
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
