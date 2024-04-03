@@ -3,8 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:penduflutter/screen/niveauscreen.dart';
 import 'package:penduflutter/screen/gamescreen.dart';
 import 'package:penduflutter/screen/homescreen.dart';
-import 'package:penduflutter/screen/rulescreen.dart';
-import 'package:penduflutter/screen/scorescreen.dart';
 
 void main() {
   runApp(MyApp());
@@ -32,14 +30,12 @@ final router = GoRouter(
       builder: (context, state) => const HomeScreen(),
     ),
     GoRoute(
-      path: "/rule",
-      builder: (context, state) => const RuleScreen(),
-    ),
-    GoRoute(
       path: "/game/:username",
       builder: (context, state) {
         final username = state.pathParameters['username'];
-        return Gamescreen(username: username);
+        final niveauString = state.extra as String?;
+        final niveau = niveauString != null ? int.tryParse(niveauString) : 1;
+        return Gamescreen(username: username, niveau: niveau);
       },
       routes: [
         GoRoute(
@@ -52,9 +48,6 @@ final router = GoRouter(
         ),
       ],
     ),
-    GoRoute(
-      path: "/score",
-      builder: (context, state) => const Scorescreen(),
-    ),
+
   ],
 );

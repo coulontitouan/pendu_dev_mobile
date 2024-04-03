@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 class Partie {
   final String? username;
   late final Map<int, bool> niveau;
-
-  Partie({required this.username}) : niveau = _createNiveau();
+  late final niveauActuel;
+  Partie({required this.username, required this.niveauActuel}) : niveau = _createNiveau();
 
   static Map<int, bool> _createNiveau() {
     Map<int, bool> niveau = {};
@@ -34,17 +34,18 @@ class Partie {
 class Gamescreen extends StatefulWidget {
   final String? username;
   final Partie partie;
-
-  Gamescreen({Key? key, required this.username})
-      : partie = Partie(username: username),
-        super(key: key); // Initialisation de partie
+  var niveau;
+  Gamescreen({Key? key, required this.username, required dynamic niveau})
+      : this.niveau = niveau,
+        partie = niveau is int ? Partie(username: username, niveauActuel: niveau) : Partie(username: username, niveauActuel: 0),
+        super(key: key);
 
   @override
   _GamescreenState createState() => _GamescreenState();
 }
 
 class _GamescreenState extends State<Gamescreen> {
-  late String? username; // Initialisez la variable username
+  late String? username; //
 
   @override
   void initState() {
@@ -57,21 +58,26 @@ class _GamescreenState extends State<Gamescreen> {
     return Column(
       children: [
         Text('Salut ${widget.username}'),
-        ListView.builder(
-          shrinkWrap: true,
-          itemCount: widget.partie.niveau.length,
-          itemBuilder: (context, index) {
-            bool niveauEstActif = widget.partie.niveau[index + 1] ?? false;
-            return ElevatedButton(
-              onPressed: niveauEstActif
-                  ? () {
-                context.go(
-                    "/game/${widget.username}/${widget.partie.getNiveau(index)}");
-              }
-                  : null,
-              child: Text('Niveau ${widget.partie.getNiveau(index)}'),
-            );
-          },
+        Container(
+          height: 50,
+          child: ListView.builder(
+            shrinkWrap: true,
+            scrollDirection: Axis.horizontal,
+            itemCount: widget.partie.niveau.length,
+            itemBuilder: (context, index) {
+              final isEnabled = index < widget.niveau;
+
+              return ElevatedButton(
+                onPressed: isEnabled
+                    ? () {
+                  context.go(
+                      "/game/${widget.username}/${widget.partie.getNiveau(index)}");
+                }
+                    : null,
+                child: Text('Niveau ${widget.partie.getNiveau(index)}'),
+              );
+            },
+          ),
         ),
       ],
     );

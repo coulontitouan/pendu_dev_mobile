@@ -21,8 +21,8 @@ class Niveau {
   String guess = '';
   int counter = 0;
   final BuildContext context;
-
-  Niveau({required this.difficulte, required this.context}) {
+  final String? username;
+  Niveau({required this.difficulte, required this.context, required this.username}) {
     mot = createMot(difficulte);
     guess = createGuess(mot);
   }
@@ -61,7 +61,27 @@ class Niveau {
     }
     guess = newGuess;
     counter += dansLeMot(lettre);
-
+    if (counter == 7){
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Dommage'),
+            content: Text('le mot était $mot'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  var t = int.tryParse(difficulte!)!;
+                  context.go('/game/${username}',extra:t.toString());
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
     if (guess == mot) {
       // Afficher un message de félicitations avec une boîte de dialogue
       showDialog(
@@ -74,7 +94,8 @@ class Niveau {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  Navigator.pop(context, difficulte);
+                  var t = int.tryParse(difficulte!)!+1;
+                  context.go('/game/${username}',extra:t.toString());
                   },
                 child: Text('OK'),
               ),
@@ -100,7 +121,7 @@ class _NiveauscreenState extends State<Niveauscreen> {
   @override
   void initState() {
     super.initState();
-    niveau = Niveau(difficulte: widget.difficulte!, context: context);
+    niveau = Niveau(difficulte: widget.difficulte!, context: context,username: widget.username);
   }
 
   @override
@@ -118,6 +139,15 @@ class _NiveauscreenState extends State<Niveauscreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text('Counter: ${niveau.counter}'),
+                Container(
+                    child: Image.asset(
+                      'images/${niveau.counter}.png',
+                      height: 100,
+                      width: 100,
+                    ),
+                ),
+
+
               ],
             ),
             SizedBox(height: 20),
@@ -238,44 +268,7 @@ class Niveaux extends StatefulWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Niveaux'),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(20),
-        child: ListView.builder(
-          itemCount: partie.niveauActuel, // Utilise le niveau actuel comme nombre d'éléments
-          itemBuilder: (context, index) {
-            int niveau = index + 1;
-            return ListTile(
-              title: Text('Niveau $niveau'),
-              trailing: niveau <= partie.niveauActuel // Vérifie si le niveau est inférieur ou égal au niveau actuel
-                  ? Icon(Icons.check_circle, color: Colors.green)
-                  : null,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Niveauscreen(
-                      difficulte: niveau.toString(),
-                      username: widget.username,
-                    ),
-                  ),
-                ).then((niveauReussi) {
-                  // Logique pour mettre à jour le niveau actuel si nécessaire après avoir terminé un niveau
-                  if (niveauReussi == true) {
-                    setState(() {
-                      partie.niveauSuivant();
-                    });
-                  }
-                });
-              },
-            );
-          },
-        ),
-      ),
-    );
+    return const Text('t');
   }
 }
 
